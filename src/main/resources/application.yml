@@ -1,0 +1,36 @@
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 200000
+        readTimeout: 200000
+        loggerLevel: basic
+
+spring:
+#  cloud:
+#    loadbalancer:
+#      ribbon:
+#        enable: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/ac_blog
+    username: ac_wchallenge_user
+    password: root2022
+  jpa:
+    hibernate:
+      ddl-auto: none
+      use-new-id-generator-mappings: true
+    generate-ddl: false
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+        jdbc.lob.non_contextual_creation: true
+        generate_statistics: false
+      open-in-view: false
+
+server:
+  port: 9513
+  servlet:
+    context-path: /ac-ms-blog-app/api
