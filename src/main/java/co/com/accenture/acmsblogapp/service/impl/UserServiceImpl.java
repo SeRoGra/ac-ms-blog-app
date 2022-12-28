@@ -2,6 +2,7 @@ package co.com.accenture.acmsblogapp.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,9 +10,14 @@ import org.springframework.stereotype.Service;
 import co.com.accenture.acmsblogapp.client.IPimRestTypicode;
 import co.com.accenture.acmsblogapp.dto.request.LoginDTORequest;
 import co.com.accenture.acmsblogapp.dto.response.AlbumDTOResponse;
+import co.com.accenture.acmsblogapp.dto.response.PhotoDTOResponse;
+import co.com.accenture.acmsblogapp.dto.response.PostDTOResponse;
 import co.com.accenture.acmsblogapp.dto.response.UserDTOResponse;
+import co.com.accenture.acmsblogapp.entity.Album;
 import co.com.accenture.acmsblogapp.exception.NotFoundServiceException;
 import co.com.accenture.acmsblogapp.exception.ValidateServiceException;
+import co.com.accenture.acmsblogapp.mapper.IAlbumMapper;
+import co.com.accenture.acmsblogapp.repository.IAlbumRepository;
 import co.com.accenture.acmsblogapp.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +27,12 @@ public class UserServiceImpl implements IUserService {
 
 	@Autowired
 	IPimRestTypicode pimRestTypicode;
+
+	@Autowired
+	IAlbumMapper albumMapper;
+
+	@Autowired
+	IAlbumRepository albumRepository;
 
 	@Override
 	public UserDTOResponse login(LoginDTORequest request) {
@@ -59,16 +71,23 @@ public class UserServiceImpl implements IUserService {
 	}
 
 	@Override
-	public List<AlbumDTOResponse> getAlbumsByUser(Integer userId) {
+	public List<Album> getAlbumsByUser(Integer userId) {
 
-		List<AlbumDTOResponse> response = new ArrayList<>();
+		List<Album> response = new ArrayList<>();
 
 		try {
-			response = pimRestTypicode.getAlbumsByUser(userId);
+
+			List<AlbumDTOResponse> albumes = pimRestTypicode.getAlbumsByUser(userId);
+			response = albumes.stream().map(p -> albumMapper.toEntity(p)).collect(Collectors.toList());
+
 		} catch (Exception e) {
-			throw new ValidateServiceException(
-					"Ha ocurrido el siguiente error al momento del consumo del servicio: " + e.getMessage());
+			log.warn("El usuario no tiene albumes en el servicio");
+//			throw new ValidateServiceException(
+//					"Ha ocurrido el siguiente error al momento del consumo del servicio: " + e.getMessage());
 		}
+
+		// ObtenerAlbumes desde BD del usuario y añadirlas a la lista
+		response.addAll(albumRepository.findByUserIdAndAlbumApiIdIsNull(userId.longValue()));
 
 		if (response.size() == 0) {
 			throw new NotFoundServiceException("El usuario no tiene ningun album");
@@ -108,6 +127,25 @@ public class UserServiceImpl implements IUserService {
 					"Ha ocurrido el siguiente error al momento del consumo del servicio: " + e.getMessage());
 		}
 
+		if (response == null) {
+			throw new NotFoundServiceException("El recurso que esta tratando de buscar no fue encontrado");
+		}
+
+		return response;
+	}
+
+	@Override
+	public List<PostDTOResponse> getPostByUser(Integer userId) {
+
+		List<PostDTOResponse> response = null;
+
+		try {
+			response = pimRestTypicode.getPostByUser(userId);
+		} catch (Exception e) {
+			throw new ValidateServiceException(
+					"Ha ocurrido el siguiente error al momento del consumo del servicio: " + e.getMessage());
+		}
+		
 		if (response == null) {
 			throw new NotFoundServiceException("El recurso que esta tratando de buscar no fue encontrado");
 		}

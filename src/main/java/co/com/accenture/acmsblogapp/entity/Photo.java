@@ -13,6 +13,7 @@ import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -43,8 +44,9 @@ public class Photo {
 	
 	private String image;
 	
+	@Default
 	@Column(name = "created_at")
-	private LocalDateTime createdAt;
+	private LocalDateTime createdAt = LocalDateTime.now();
 	
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;

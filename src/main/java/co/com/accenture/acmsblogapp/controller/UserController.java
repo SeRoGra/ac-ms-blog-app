@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import co.com.accenture.acmsblogapp.dto.request.LoginDTORequest;
 import co.com.accenture.acmsblogapp.dto.response.AlbumDTOResponse;
+import co.com.accenture.acmsblogapp.dto.response.PostDTOResponse;
 import co.com.accenture.acmsblogapp.dto.response.UserDTOResponse;
+import co.com.accenture.acmsblogapp.entity.Album;
 import co.com.accenture.acmsblogapp.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,10 +40,17 @@ public class UserController {
 	}
 
 	@GetMapping(path = "/{id}/albums")
-	public ResponseEntity<List<AlbumDTOResponse>> getAlbumByUser(@PathVariable(name = "id") Integer userId) {
+	public ResponseEntity<List<Album>> getAlbumByUser(@PathVariable(name = "id") Integer userId) {
 
-		return new ResponseEntity<List<AlbumDTOResponse>>(userService.getAlbumsByUser(userId), HttpStatus.OK);
+		return new ResponseEntity<List<Album>>(userService.getAlbumsByUser(userId), HttpStatus.OK);
 
+	}
+
+	@GetMapping(path = "/{id}/posts")
+	public ResponseEntity<List<PostDTOResponse>> getPostByUser(@PathVariable(name = "id") Integer userId) {
+
+		return new ResponseEntity<List<PostDTOResponse>>(userService.getPostByUser(userId), HttpStatus.OK);
+		
 	}
 
 	@GetMapping
